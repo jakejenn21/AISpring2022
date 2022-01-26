@@ -31,9 +31,7 @@ class SearchProblem:
         """
         Returns the start state for the search problem.
         """
-        startState = self.getStartState()
-
-        return startState
+        util.raiseNotDefined()
 
     def isGoalState(self, state):
         """
@@ -41,12 +39,7 @@ class SearchProblem:
 
         Returns True if and only if the state is a valid goal state.
         """
-        goalState = self.isGoalState(state)
-
-        if goalState:
-            return True
-        else:
-            return False
+        util.raiseNotDefined()
 
     def getSuccessors(self, state):
         """
@@ -57,8 +50,7 @@ class SearchProblem:
         state, 'action' is the action required to get there, and 'stepCost' is
         the incremental cost of expanding to that successor.
         """
-        triplesList = self.getSuccessors(state)
-        return triplesList
+        util.raiseNotDefined()
 
     def getCostOfActions(self, actions):
         """
@@ -67,11 +59,7 @@ class SearchProblem:
         This method returns the total cost of a particular sequence of actions.
         The sequence must be composed of legal moves.
         """
-        actionsCost = self.getCostOfActions(actions)
-        if actionsCost == 999999:
-            return "actions include an illegal move"
-        else:
-            return actionsCost
+        util.raiseNotDefined()
 
 
 def tinyMazeSearch(problem):
@@ -83,6 +71,9 @@ def tinyMazeSearch(problem):
     s = Directions.SOUTH
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
+
+
+# visit https://utah.instructure.com/courses/754723/files/folder/Slides?preview=127287980 to view general tree search slide 9
 
 def depthFirstSearch(problem):
     """
@@ -99,17 +90,39 @@ def depthFirstSearch(problem):
     print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
     "*** YOUR CODE HERE ***"
-    
+
+    # Strategy: expand a deepest node first
+
+    # Frontier is a stack in util.py 
+
     util.raiseNotDefined()
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
+
+    # Strategy: expand a shallowest node first
+
+    # Frontier is a queue in util.py
     util.raiseNotDefined()
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
     "*** YOUR CODE HERE ***"
+
+    # Strategy: 
+
+    # Frontier is a priority queue in util.py
+
+    # key : total path cost to this point
+    # expand path with lowest key value
+    # converges quickly
+
+    # when expanding a node, add the resulting nodes to the frontier only
+    #if not in the vistited list
+    #or if already in the frontier, but with a higher cost (replace it)
+
+
     util.raiseNotDefined()
 
 def nullHeuristic(state, problem=None):
@@ -117,11 +130,20 @@ def nullHeuristic(state, problem=None):
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
+    #print(state)
+
+    #return cost to goal state
+
     return 0
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
+
+    #combines UCS and greedy search
+
+    # A * search orders by the sum: f(n) = g(n) + h(n)
+
     util.raiseNotDefined()
 
 
