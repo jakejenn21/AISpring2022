@@ -19,6 +19,7 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -70,7 +71,7 @@ def tinyMazeSearch(problem):
     from game import Directions
     s = Directions.SOUTH
     w = Directions.WEST
-    return  [s, s, w, s, w, w, s, w]
+    return [s, s, w, s, w, w, s, w]
 
 
 # visit https://utah.instructure.com/courses/754723/files/folder/Slides?preview=127287980 to view general tree search slide 9
@@ -92,10 +93,26 @@ def depthFirstSearch(problem):
     "*** YOUR CODE HERE ***"
 
     # Strategy: expand a deepest node first
+    # Frontier is a stack in util.py
 
-    # Frontier is a stack in util.py 
+    closed = set()
+    fringe = util.Stack()
 
-    util.raiseNotDefined()
+    # add start state with an empty action list
+    fringe.push((problem.getStartState(), ()))
+    while True:
+        if fringe.isEmpty():
+            # TODO: use a better error
+            util.raiseNotDefined()
+        (currState, currActions) = fringe.pop()
+        if problem.isGoalState(currState):
+            return currState, currActions
+        if currState not in closed:
+            closed.add(currState)
+            for (state, action, cost) in problem.getSuccessors(currState):
+                # keep track of all actions leading to this one
+                newActions = currActions + action
+                fringe.push((state, newActions))
 
 
 def breadthFirstSearch(problem):
@@ -105,7 +122,25 @@ def breadthFirstSearch(problem):
     # Strategy: expand a shallowest node first
 
     # Frontier is a queue in util.py
-    util.raiseNotDefined()
+    closed = set()
+    fringe = util.Queue()
+
+    # add start state with an empty action list
+    fringe.push((problem.getStartState(), ()))
+    while True:
+        if fringe.isEmpty():
+            # TODO: use a better error
+            util.raiseNotDefined()
+        (currState, currActions) = fringe.pop()
+        if problem.isGoalState(currState):
+            return currState, currActions
+        if currState not in closed:
+            closed.add(currState)
+            for (state, action, cost) in problem.getSuccessors(currState):
+                # keep track of all actions leading to this one
+                newActions = currActions + action
+                fringe.push((state, newActions))
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
@@ -120,28 +155,46 @@ def uniformCostSearch(problem):
     # converges quickly
 
     # when expanding a node, add the resulting nodes to the frontier only
-    #if not in the vistited list
-    #or if already in the frontier, but with a higher cost (replace it)
+    # if not in the visited list
+    # or if already in the frontier, but with a higher cost (replace it)
 
+    closed = set()
+    fringe = util.PriorityQueue()
 
-    util.raiseNotDefined()
+    # add start state with an empty action list
+    fringe.push((problem.getStartState(), ()), 0)
+    while True:
+        if fringe.isEmpty():
+            # TODO: use a better error
+            util.raiseNotDefined()
+        (currState, currActions) = fringe.pop()
+        if problem.isGoalState(currState):
+            return currState, currActions
+        if currState not in closed:
+            closed.add(currState)
+            for (state, action, cost) in problem.getSuccessors(currState):
+                # keep track of all actions leading to this one
+                newActions = currActions + action
+                fringe.push((state, newActions), problem.getCostOfActions(newActions))
+
 
 def nullHeuristic(state, problem=None):
     """
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
-    #print(state)
+    # print(state)
 
-    #return cost to goal state
+    # return cost to goal state
 
     return 0
+
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
 
-    #combines UCS and greedy search
+    # combines UCS and greedy search
 
     # A * search orders by the sum: f(n) = g(n) + h(n)
 
