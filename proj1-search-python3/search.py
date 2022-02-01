@@ -87,9 +87,9 @@ def depthFirstSearch(problem):
     understand the search problem that is being passed in:
     """
 
-    # print("Start:", problem.getStartState())
-    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    print("Start:", problem.getStartState())
+    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     "*** YOUR CODE HERE ***"
 
     # Strategy: expand a deepest node first
@@ -99,19 +99,19 @@ def depthFirstSearch(problem):
     fringe = util.Stack()
 
     # add start state with an empty action list
-    fringe.push((problem.getStartState(), ()))
+    fringe.push((problem.getStartState(), []))
     while True:
         if fringe.isEmpty():
             # TODO: use a better error
-            util.raiseNotDefined()
-        (currState, currActions) = fringe.pop()
-        if problem.isGoalState(currState):
-            return currState, currActions
-        if currState not in closed:
-            closed.add(currState)
-            for (state, action, cost) in problem.getSuccessors(currState):
+            print("No solution")
+        node = fringe.pop()
+        if problem.isGoalState(node[0]):
+            return node[1]
+        if node[0] not in closed:
+            closed.add(node[0])
+            for (state, action, cost) in problem.getSuccessors(node[0]):
                 # keep track of all actions leading to this one
-                newActions = currActions + action
+                newActions = node[1] + [action]
                 fringe.push((state, newActions))
 
 
