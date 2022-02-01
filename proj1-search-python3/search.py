@@ -99,19 +99,21 @@ def depthFirstSearch(problem):
     fringe = util.Stack()
 
     # add start state with an empty action list
-    fringe.push((problem.getStartState(), ()))
+    fringe.push((problem.getStartState(), []))
     while True:
         if fringe.isEmpty():
             # TODO: use a better error
             util.raiseNotDefined()
-        (currState, currActions) = fringe.pop()
+        node = fringe.pop()
+        currState = node[0]
+        currActions = node[1]
         if problem.isGoalState(currState):
-            return currState, currActions
+            return currActions
         if currState not in closed:
             closed.add(currState)
             for (state, action, cost) in problem.getSuccessors(currState):
                 # keep track of all actions leading to this one
-                newActions = currActions + action
+                newActions = currActions + [action]
                 fringe.push((state, newActions))
 
 
@@ -126,19 +128,21 @@ def breadthFirstSearch(problem):
     fringe = util.Queue()
 
     # add start state with an empty action list
-    fringe.push((problem.getStartState(), ()))
+    fringe.push((problem.getStartState(), []))
     while True:
         if fringe.isEmpty():
             # TODO: use a better error
             util.raiseNotDefined()
-        (currState, currActions) = fringe.pop()
+        node = fringe.pop()
+        currState = node[0]
+        currActions = node[1]
         if problem.isGoalState(currState):
-            return currState, currActions
+            return currActions
         if currState not in closed:
             closed.add(currState)
             for (state, action, cost) in problem.getSuccessors(currState):
                 # keep track of all actions leading to this one
-                newActions = currActions + action
+                newActions = currActions + [action]
                 fringe.push((state, newActions))
 
 
@@ -162,19 +166,21 @@ def uniformCostSearch(problem):
     fringe = util.PriorityQueue()
 
     # add start state with an empty action list
-    fringe.push((problem.getStartState(), ()), 0)
+    fringe.push((problem.getStartState(), []), 0)
     while True:
         if fringe.isEmpty():
             # TODO: use a better error
             util.raiseNotDefined()
-        (currState, currActions) = fringe.pop()
+        node = fringe.pop()
+        currState = node[0]
+        currActions = node[1]
         if problem.isGoalState(currState):
-            return currState, currActions
+            return currActions
         if currState not in closed:
             closed.add(currState)
             for (state, action, cost) in problem.getSuccessors(currState):
                 # keep track of all actions leading to this one
-                newActions = currActions + action
+                newActions = currActions + [action]
                 fringe.push((state, newActions), problem.getCostOfActions(newActions))
 
 
