@@ -189,10 +189,6 @@ def nullHeuristic(state, problem=None):
     A heuristic function estimates the cost from the current state to the nearest
     goal in the provided SearchProblem.  This heuristic is trivial.
     """
-    # print(state)
-
-    # return cost to goal state
-
     return 0
 
 
@@ -203,8 +199,26 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     # combines UCS and greedy search
 
     # A * search orders by the sum: f(n) = g(n) + h(n)
+    closed = set()
+    fringe = util.PriorityQueue()
 
-    util.raiseNotDefined()
+    # add start state with an empty action list
+    fringe.push((problem.getStartState(), []), 0)
+    while True:
+        if fringe.isEmpty():
+            # TODO: use a better error
+            util.raiseNotDefined()
+        node = fringe.pop()
+        currState = node[0]
+        currActions = node[1]
+        if problem.isGoalState(currState):
+            return currActions
+        if currState not in closed:
+            closed.add(currState)
+            for (state, action, cost) in problem.getSuccessors(currState):
+                # keep track of all actions leading to this one
+                newActions = currActions + [action]
+                fringe.push((state, newActions), problem.getCostOfActions(newActions) + heuristic(state, problem))
 
 
 # Abbreviations
