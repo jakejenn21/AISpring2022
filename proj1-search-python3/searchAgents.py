@@ -299,7 +299,7 @@ class CornersProblem(search.SearchProblem):
         # in initializing the problem
         "*** YOUR CODE HERE ***"
         # self.start = (self.startingPosition, [])
-        self.visitedCorners = []
+        self.cornersList = []
 
     def getStartState(self):
         """
@@ -314,6 +314,8 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
+
+        node = state
         # for corner in self.corners:
         #     if state == corner:
         #         self.visitedCorners.add(corner)
@@ -321,15 +323,11 @@ class CornersProblem(search.SearchProblem):
 
         # print("visited:", self.visitedCorners)
 
-        if state in self.corners:
-            if state not in self.visitedCorners:
-                self.visitedCorners.add(state)
-            return len(self.visitedCorners) == 4
-        else:
-            return False
-
-
-
+        if node in self.corners:
+            if node not in self.cornersList:
+                self.cornersList.append(node)
+            return len(self.cornersList) == 4
+        return False
 
     def getSuccessors(self, state):
         """
@@ -358,16 +356,15 @@ class CornersProblem(search.SearchProblem):
             hitWall = self.walls[nextx][nexty]
             if not hitWall:
                 next_state = (nextx, nexty)
-                # successVisitedCorners = list(self.visitedCorners)
-                # if next_state in self.corners:
-                #     corner_state = next_state
-                #     if corner_state not in successVisitedCorners:
-                #         successVisitedCorners.append(corner_state)
+                if next_state in self.corners:
+                    corner_state = next_state
+                    if corner_state not in self.cornersList:
+                        self.cornersList.append(corner_state)
                 child = (next_state, action, 1)
                 successors.append(child)
 
-            self._expanded += 1  # DO NOT CHANGE
-            return successors
+        self._expanded += 1  # DO NOT CHANGE
+        return successors
 
 
 def getCostOfActions(self, actions):
@@ -402,24 +399,21 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     # Find which corners are left to reach GoalState.
-    visitedCorners = state[1]
-    cornersLeftToVisit = []
+    node = state
+    visitedList = problem.cornersList
+    cornersToVisit = []
     for corner in corners:
-        if corner not in visitedCorners:
-            cornersLeftToVisit.append(corner)
-
-    # While not all corners are visited find via manhattanDistance
-    #  the most efficient path for each corner
-    totalCost = 0
-    coordinate = state[0]
-    curPoint = coordinate
-    while cornersLeftToVisit:
-        heuristic_cost, corner = \
-            min([(util.manhattanDistance(curPoint, corner), corner) for corner in cornersLeftToVisit])
-        cornersLeftToVisit.remove(corner)
-        curPoint = corner
-        totalCost += heuristic_cost
-    return totalCost
+        if corner not in visitedList:
+            cornersToVisit.append(corner)
+            
+    if len(cornersToVisit) == 0:
+        return 0
+    
+    manhatten = []
+    for n in cornersToVisit:
+        manhatten.append(util.manhattanDistance(n, node))
+        cornersToVisit.remove(n)
+    return min(manhatten)
 
 
 class AStarCornersAgent(SearchAgent):
@@ -563,10 +557,10 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        # return search.dfs(problem)   # 5324
-        return search.bfs(problem)  # 350
-        # return search.ucs(problem)   # 350
-        # return search.astar(problem) # 350
+        # return search.dfs(problem) 
+        #return search.bfs(problem)  
+        # return search.ucs(problem)  
+        return search.astar(problem) 
         # util.raiseNotDefined()
         util.raiseNotDefined()
 
