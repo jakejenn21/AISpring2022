@@ -389,6 +389,19 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+def findClosestCorner(cornersToVisit, position):
+    minSoFar = 100000000
+    minCorner = 0
+    accDist = 0
+    for n in cornersToVisit:
+
+        dist = util.manhattanDistance(n, position)
+        if dist < minSoFar:
+            minSoFar = dist
+            minCorner = n
+
+    return (minSoFar, minCorner)
+
 
 def cornersHeuristic(state, problem):
     """
@@ -408,21 +421,28 @@ def cornersHeuristic(state, problem):
 
     "*** YOUR CODE HERE ***"
     # Find which corners are left to reach GoalState.
-    node = state
-    visitedList = problem.cornersList
+    position = state[0]
+    visitedList = list(state[1])
     cornersToVisit = []
-    for corner in corners:
-        if corner not in visitedList:
-            cornersToVisit.append(corner)
+    for i in range(0,4):
+        if not visitedList[i]:
+            cornersToVisit.append(corners[i])
             
     if len(cornersToVisit) == 0:
         return 0
     
-    manhatten = []
-    for n in cornersToVisit:
-        manhatten.append(util.manhattanDistance(n, node))
-        cornersToVisit.remove(n)
-    return min(manhatten)
+    (minSoFar, minCorner) = findClosestCorner(cornersToVisit, position)
+    accDist = minSoFar
+
+    cornersToVisit.remove(minCorner)
+
+    while cornersToVisit:
+
+        (minSoFar, minCorner) = findClosestCorner(cornersToVisit, minCorner)
+        accDist += minSoFar
+        cornersToVisit.remove(minCorner)
+
+    return accDist
 
 
 class AStarCornersAgent(SearchAgent):
@@ -524,16 +544,33 @@ def foodHeuristic(state, problem):
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
     foodToEat = foodGrid.asList()
-    totalCost = 0
-    curPoint = position
-    while foodToEat:
-        heuristic_cost, food = \
-            min([(util.manhattanDistance(curPoint, food), food) for food in foodToEat])
-        foodToEat.remove(food)
-        curPoint = food
-        totalCost += heuristic_cost
+    length = len(foodToEat)
+    accDist = 0
 
-    return totalCost
+    if len(foodToEat) == 0:
+        return 0
+
+    (minSoFar, minFood) = findClosestCorner(foodToEat, position)
+    accDist += minSoFar
+
+    foodToEat.remove(minFood)
+
+    while foodToEat:
+
+        (minSoFar, minFood) = findClosestCorner(foodToEat, minFood)
+        accDist += minSoFar
+        foodToEat.remove(minFood)
+
+    return accDist/length
+    # while foodToEat:
+
+    #     heuristic_cost, food = \
+    #         min([(util.manhattanDistance(curPoint, food), food) for food in foodToEat])
+    #     foodToEat.remove(food)
+    #     curPoint = food
+    #     totalCost += heuristic_cost
+
+    # return totalCost
 
 
 class ClosestDotSearchAgent(SearchAgent):
@@ -566,12 +603,7 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        # return search.dfs(problem) 
-        #return search.bfs(problem)  
-        # return search.ucs(problem)  
         return search.astar(problem) 
-        # util.raiseNotDefined()
-        util.raiseNotDefined()
 
 
 class AnyFoodSearchProblem(PositionSearchProblem):
