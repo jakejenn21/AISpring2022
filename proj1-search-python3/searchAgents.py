@@ -403,6 +403,7 @@ def findClosestCorner(cornersToVisit, position):
     return (minSoFar, minCorner)
 
 
+
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -550,18 +551,26 @@ def foodHeuristic(state, problem):
     if len(foodToEat) == 0:
         return 0
 
-    (minSoFar, minFood) = findClosestCorner(foodToEat, position)
-    accDist += minSoFar
+    maxSoFar = -1
+    for food in foodToEat:
+        dist = mazeDistance(food, position, problem.startingGameState)
+        if dist > maxSoFar:
+            maxSoFar = dist
 
-    foodToEat.remove(minFood)
+    return maxSoFar
 
-    while foodToEat:
-
-        (minSoFar, minFood) = findClosestCorner(foodToEat, minFood)
-        accDist += minSoFar
-        foodToEat.remove(minFood)
-
-    return accDist/length
+    # (minSoFar, minFood) = findClosestCorner(foodToEat, position)
+    # accDist += minSoFar
+    #
+    # foodToEat.remove(minFood)
+    #
+    # while foodToEat:
+    #
+    #     (minSoFar, minFood) = findClosestCorner(foodToEat, minFood)
+    #     accDist += minSoFar
+    #     foodToEat.remove(minFood)
+    #
+    # return accDist/length
     # while foodToEat:
 
     #     heuristic_cost, food = \
