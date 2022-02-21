@@ -543,25 +543,25 @@ def foodHeuristic(state, problem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    foodToEat = foodGrid.asList()
-    length = len(foodToEat)
-    accDist = 0
+    # foodToEat = foodGrid.asList()
+    # length = len(foodToEat)
+    # accDist = 0
 
-    if len(foodToEat) == 0:
-        return 0
+    # if len(foodToEat) == 0:
+    #     return 0
 
-    (minSoFar, minFood) = findClosestCorner(foodToEat, position)
-    accDist += minSoFar
+    # (minSoFar, minFood) = findClosestCorner(foodToEat, position)
+    # accDist += minSoFar
 
-    foodToEat.remove(minFood)
+    # foodToEat.remove(minFood)
 
-    while foodToEat:
+    # while foodToEat:
 
-        (minSoFar, minFood) = findClosestCorner(foodToEat, minFood)
-        accDist += minSoFar
-        foodToEat.remove(minFood)
+    #     (minSoFar, minFood) = findClosestCorner(foodToEat, minFood)
+    #     accDist += minSoFar
+    #     foodToEat.remove(minFood)
 
-    return accDist/length
+    # return accDist/length
     # while foodToEat:
 
     #     heuristic_cost, food = \
@@ -571,6 +571,18 @@ def foodHeuristic(state, problem):
     #     totalCost += heuristic_cost
 
     # return totalCost
+
+
+    foodToEat = foodGrid.asList()
+    try:
+        lambdaFunc = lambda x: mazeDistance(position, x, problem.startingGameState)
+        mapVar = map(lambdaFunc, foodToEat)
+        tupleVar = tuple(mapVar)
+        #returns max maze distance from position to food to eat posiiton
+        return max(tupleVar)
+    # End the search heuristic if no food exists on the grid
+    except Exception as e:
+        return 0
 
 
 class ClosestDotSearchAgent(SearchAgent):
