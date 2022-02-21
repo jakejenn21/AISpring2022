@@ -12,6 +12,7 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from hashlib import new
 from util import manhattanDistance
 from game import Directions
 import random, util
@@ -67,12 +68,60 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
-        successorGameState = currentGameState.generatePacmanSuccessor(action)
-        newPos = successorGameState.getPacmanPosition()
-        newFood = successorGameState.getFood()
-        newGhostStates = successorGameState.getGhostStates()
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+        #  peanalize for making a move???
+
+        # matrix of game map
+        successorGameState = currentGameState.generatePacmanSuccessor(action)
+        print("Succesor Game State: ",successorGameState)
+
+        # (x,y) - position in game
+        newPos = successorGameState.getPacmanPosition()
+        #print("Sucessor New Postion: ", newPos)
+
+        # matrix of T/F
+        newFood = successorGameState.getFood()
+        #print("Sucessor New Food: ", newFood)
+
+        # 
+        newGhostStates = successorGameState.getGhostStates()
+        print("New Ghost States: ", print(str(newGhostStates)))
+
+        #
+        # when a ghost is in a state where they are scared of the pacman
+        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+        #print("New Scared Times: ", newScaredTimes)
+
+        evaluationScore = currentGameState.getScore()
+
+        # come up with scales of game score
+
+        # check if position of succesor lands on a food
+
+        print(newPos[0], newPos[1])
+        print(newFood[newPos[0]][newPos[1]])
+        if newFood[newPos[0]][newPos[1]] == "T":
+            print("hit food")
+            evaluationScore += 500
+        else:
+            print("no hit")
+
+        # check distance to closest food
+
+        # check distance to each adversary, penalize accordingly to manhattan
+
+        # initialize sum
+        # for each adversary
+        # calculate distance from succesor position
+        # accumulate sum
+        # higher score -> less penalty
+        # lower score -> more penalty
+
+
+        # new scared times?
+
+
+        print("Sucessor Game State Score: ", successorGameState.getScore())
         "*** YOUR CODE HERE ***"
         return successorGameState.getScore()
 
