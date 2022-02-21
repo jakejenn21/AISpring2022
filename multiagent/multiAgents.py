@@ -68,8 +68,12 @@ class ReflexAgent(Agent):
         to create a masterful evaluation function.
         """
         # Useful information you can extract from a GameState (pacman.py)
+        
 
-        #  peanalize for making a move???
+        # -1 for each action
+        evaluationScore = currentGameState.getScore() - 1
+
+        # get data for evaluation 
 
         # matrix of game map
         successorGameState = currentGameState.generatePacmanSuccessor(action)
@@ -83,26 +87,36 @@ class ReflexAgent(Agent):
         newFood = successorGameState.getFood()
         #print("Sucessor New Food: ", newFood)
 
-        # 
+        # [array of ghost states for this sucessor]
         newGhostStates = successorGameState.getGhostStates()
-        print("New Ghost States: ", print(str(newGhostStates)))
+        print("New Ghost States: ", str(newGhostStates))
+        # ((x,y), Direction)
+        # getDirection
+        # getPosition
+        ghost1 = newGhostStates[0]
+        print(str(ghost1))
 
-        #
+        # [array of steps a ghost has before timer stops]
         # when a ghost is in a state where they are scared of the pacman
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        #print("New Scared Times: ", newScaredTimes)
+        print("New Scared Times: ", newScaredTimes)
 
-        evaluationScore = currentGameState.getScore()
-
-        # come up with scales of game score
+        #process data
 
         # check if position of succesor lands on a food
 
-        print(newPos[0], newPos[1])
-        print(newFood[newPos[0]][newPos[1]])
-        if newFood[newPos[0]][newPos[1]] == "T":
+        # +10 eating a dot
+
+        print("New Pos: ", newPos[0], newPos[1])
+        print("New Food: ", type(newFood))
+        print("New Food Value @ Position: ", newFood[1][1])
+
+        if newPos == (3,1):
+            print("dummy")
+
+        if newFood[newPos[0]][newPos[1]] == True:
             print("hit food")
-            evaluationScore += 500
+            evaluationScore += 10
         else:
             print("no hit")
 
