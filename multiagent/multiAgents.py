@@ -71,14 +71,15 @@ class ReflexAgent(Agent):
         
 
         # -1 for each action
-        evaluationScore = currentGameState.getScore() - 1
+        evaluationScore = -1
+        #evaluationScore = currentGameState.getScore() - 1
 
         # get data for evaluation 
 
         # matrix of game map
         successorGameState = currentGameState.generatePacmanSuccessor(action)
         # print("Succesor Game State: ",successorGameState)
-
+        currentGameState
         # (x,y) - position in game
         newPos = successorGameState.getPacmanPosition()
         #print("Sucessor New Postion: ", newPos)
@@ -92,13 +93,59 @@ class ReflexAgent(Agent):
         newGhostStates = successorGameState.getGhostStates()
         # print("New Ghost States: ", str(newGhostStates))
         # ((x,y), Direction)
-        ghost1 = newGhostStates[0]
-        # print(str(ghost1))
+        #ghost1 = newGhostStates[0]
+        #print(str(ghost1))
+        dist = 0
+        reward = -0.1
+        for food in newFood.asList():
+            dist += util.manhattanDistance(newPos, food)
 
-        # [array of steps a ghost has before timer stops]
-        # when a ghost is in a state where they are scared of the pacman
-        newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        # print("New Scared Times: ", newScaredTimes)
+        evaluationScore += dist * reward
+
+        # accumulate rewards for power pellets
+        # successorGameState.getCapsules()
+
+            # get manhattan dist from pellet to newPos
+            # accumulate w/ some reward
+            # reward = -0.5
+            # dist * reward
+
+        dist = 0
+        reward = -0.5
+        for pellet in successorGameState.getCapsules():
+            currDist = util.manhattanDistance(newPos, pellet)
+            dist += currDist
+            if currDist == 0:
+                evaluationScore += 500
+
+        evaluationScore += dist * reward
+
+        dist = 0
+        for ghost in newGhostStates:
+            # get manhattan dist from ghost[0] to newPos
+            currDist = util.manhattanDistance(newPos, ghost.getPosition())
+            dist += currDist
+            # accumulate w/ some reward
+            if ghost.scaredTimer == 0:
+                reward = .5
+                # dist * reward
+                evaluationScore += currDist * reward
+                # -500 if pos = brave ghost pos
+                if currDist == 0:
+                    evaluationScore -= 1000
+            # if scared, treat it like a capsule
+            else:
+                reward = -1.5
+                # reward * dist
+                evaluationScore += currDist / ghost.scaredTimer * reward
+                # reward if pos = scared ghost pos
+                if currDist == 0:
+                    evaluationScore += 800
+                # reward for scared timer
+
+
+
+        #print("New Scared Times: ", newScaredTimes)
 
         #process data
 
@@ -111,37 +158,12 @@ class ReflexAgent(Agent):
         # print("New Food Value @ Position: ", newFood[1][1])
 
         if currFood[newPos[0]][newPos[1]]:
-            # print("hit food")
             evaluationScore += 10
-        # else:
-        #     print("no hit")
-
         if len(newFood.asList()) == 0:
-            # print("all food gained")
-            evaluationScore += 500
-
-        # check distance to closest food
-
-        # check distance to each adversary, penalize accordingly to manhattan
-
-        # initialize sum
-        adversaryDist = 0
-        # for each adversary
-        for ghost in newGhostStates:
-            # calculate distance from successor position
-            adversaryDist += util.manhattanDistance(newPos, ghost.getPosition())
-        # accumulate sum
-        # higher score -> less penalty
-        # lower score -> more penalty
-        evaluationScore -= adversaryDist / len(newGhostStates)
-
-
-        # new scared times?
-
-
+            evaluationScore += 1000
         # print("Sucessor Game State Score: ", successorGameState.getScore())
         "*** YOUR CODE HERE ***"
-        return successorGameState.getScore()
+        return evaluationScore
 
 def scoreEvaluationFunction(currentGameState):
     """
