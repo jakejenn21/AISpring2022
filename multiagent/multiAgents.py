@@ -77,29 +77,28 @@ class ReflexAgent(Agent):
 
         # matrix of game map
         successorGameState = currentGameState.generatePacmanSuccessor(action)
-        print("Succesor Game State: ",successorGameState)
+        # print("Succesor Game State: ",successorGameState)
 
         # (x,y) - position in game
         newPos = successorGameState.getPacmanPosition()
         #print("Sucessor New Postion: ", newPos)
 
         # matrix of T/F
+        currFood = currentGameState.getFood()
         newFood = successorGameState.getFood()
         #print("Sucessor New Food: ", newFood)
 
         # [array of ghost states for this sucessor]
         newGhostStates = successorGameState.getGhostStates()
-        print("New Ghost States: ", str(newGhostStates))
+        # print("New Ghost States: ", str(newGhostStates))
         # ((x,y), Direction)
-        # getDirection
-        # getPosition
         ghost1 = newGhostStates[0]
-        print(str(ghost1))
+        # print(str(ghost1))
 
         # [array of steps a ghost has before timer stops]
         # when a ghost is in a state where they are scared of the pacman
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
-        print("New Scared Times: ", newScaredTimes)
+        # print("New Scared Times: ", newScaredTimes)
 
         #process data
 
@@ -107,35 +106,40 @@ class ReflexAgent(Agent):
 
         # +10 eating a dot
 
-        print("New Pos: ", newPos[0], newPos[1])
-        print("New Food: ", type(newFood))
-        print("New Food Value @ Position: ", newFood[1][1])
+        # print("New Pos: ", newPos[0], newPos[1])
+        # print("New Food: ", newFood)
+        # print("New Food Value @ Position: ", newFood[1][1])
 
-        if newPos == (3,1):
-            print("dummy")
-
-        if newFood[newPos[0]][newPos[1]] == True:
-            print("hit food")
+        if currFood[newPos[0]][newPos[1]]:
+            # print("hit food")
             evaluationScore += 10
-        else:
-            print("no hit")
+        # else:
+        #     print("no hit")
+
+        if len(newFood.asList()) == 0:
+            # print("all food gained")
+            evaluationScore += 500
 
         # check distance to closest food
 
         # check distance to each adversary, penalize accordingly to manhattan
 
         # initialize sum
+        adversaryDist = 0
         # for each adversary
-        # calculate distance from succesor position
+        for ghost in newGhostStates:
+            # calculate distance from successor position
+            adversaryDist += util.manhattanDistance(newPos, ghost.getPosition())
         # accumulate sum
         # higher score -> less penalty
         # lower score -> more penalty
+        evaluationScore -= adversaryDist / len(newGhostStates)
 
 
         # new scared times?
 
 
-        print("Sucessor Game State Score: ", successorGameState.getScore())
+        # print("Sucessor Game State Score: ", successorGameState.getScore())
         "*** YOUR CODE HERE ***"
         return successorGameState.getScore()
 
