@@ -257,7 +257,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             for i in range(gameState.getNumAgents()-1):
                 v = 10000000000
                 scores = []
-                scores.append(v)
+                scores.append((v,""))
                 #print(gameState.getLegalActions(i))
                 # Ghost actions sucessors
                 for action in gameState.getLegalActions(i):
