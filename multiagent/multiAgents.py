@@ -189,7 +189,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
     """
 
     # game.py -> Agent -> helper methods for "gameState"
-    def getAction(self, gameState):
+    def getAction(self,gameState):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
@@ -214,7 +214,85 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        
+        # if state is terminal -> return the states utility
+        # if gameState.isWin() or self.depth == 0:
+        #     return gameState
+
+        # we need to add cost for each depth that scales up the deeper
+
+        #['Left', 'Right']
+        # agentIndex=0 means Pacman, ghosts are >= 1
+
+        # Pacman
+        if self.index == 0:
+            #---------MAXIMIZE----------
+
+            v = -100000000000
+            scores = []
+            scores.append((v,""))
+
+            # Pacman actions sucessors
+            for action in gameState.getLegalActions(self.index):
+                #print(gameState.generateSuccessor(self.index, action))
+                pacmanActionSucessor = gameState.generateSuccessor(self.index, action)
+                score = self.evaluationFunction(pacmanActionSucessor)
+                #print("Pacman Successor Score: ", score)
+                if score > v:
+                    scores.append((score, action))
+                else:
+                    scores.append((v, action))
+
+            #maximize pacman score
+            maxPacman = max(scores)
+
+            self.depth -= 1
+
+            return maxPacman[1]
+
+        # Ghost
+        else:
+            #--------MINIMIZE---------
+            ghosts = []
+            # for each ghost
+            for i in range(gameState.getNumAgents()-1):
+                v = 10000000000
+                scores = []
+                scores.append(v)
+                #print(gameState.getLegalActions(i))
+                # Ghost actions sucessors
+                for action in gameState.getLegalActions(i):
+                    #print(gameState.generateSuccessor(i, action))
+                    ghostActionSucessor = gameState.generateSuccessor(i, action)
+                    score = self.evaluationFunction(ghostActionSucessor)
+                    #print("Ghost Successor Score: ", score)
+                    if score < v:
+                        scores.append((score, action))
+                    else:
+                        scores.append((v, action))
+                
+                #minimize ghosts score
+                minGhost = min(scores)
+                ghosts.append(minGhost)
+            
+            self.depth -= 1
+
+            minGhosts = min(ghosts)
+
+            return minGhosts[1]
+
+    
+
+
+        # Returns the total number of agents in the game
+        print(gameState.getNumAgents())
+
+        # Returns whether or not the game state is a winning state
+        print(gameState.isWin())
+
+        # Returns whether or not the game state is a losing state
+        print(gameState.isLose())
+
+
         util.raiseNotDefined()
 
 
