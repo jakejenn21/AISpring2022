@@ -215,8 +215,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
 
         # if state is terminal -> return the states utility
-        # if gameState.isWin() or self.depth == 0:
-        #     return gameState
+        if gameState.isWin() or self.depth == 0:
+            return self.evaluationFunction(gameState)
 
         # we need to add cost for each depth that scales up the deeper
 
