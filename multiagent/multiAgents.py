@@ -82,12 +82,12 @@ class ReflexAgent(Agent):
 
         # (x,y) - position in game
         newPos = successorGameState.getPacmanPosition()
-        #print("Sucessor New Postion: ", newPos)
+        # print("Sucessor New Postion: ", newPos)
 
         # matrix of T/F
         currFood = currentGameState.getFood()
         newFood = successorGameState.getFood()
-        #print("Sucessor New Food: ", newFood)
+        # print("Sucessor New Food: ", newFood)
 
         # [array of ghost states for this sucessor]
         newGhostStates = successorGameState.getGhostStates()
@@ -102,8 +102,7 @@ class ReflexAgent(Agent):
 
         evaluationScore += dist * reward
 
-
-         # pellet distance to player evaluation
+        # pellet distance to player evaluation
         dist = 0
         reward = -0.5
         for pellet in successorGameState.getCapsules():
@@ -114,8 +113,6 @@ class ReflexAgent(Agent):
                 evaluationScore += 800
 
         evaluationScore += dist * reward
-
-
 
         # ghost to player evaluation
         dist = 0
@@ -182,6 +179,7 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+
 # def maxValue(self, sucessors, alpha = None, beta = None):
 #     # initialize v to -inf
 #     v = float('-inf')
@@ -217,9 +215,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
+    def maxValue(self, depth, state):
+
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        actions = state.getLegalActions(0)
+
+        successors = [state.generateSuccessor(0, action) for action in actions]
+        scores = [self.minValue(depth, state, 1) for state in successors]
+        return max(scores)
+
+    def minValue(self, depth, state, index):
+
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        actions = state.getLegalActions(index)
+
+        successors = [state.generateSuccessor(index, action) for action in actions]
+
+        if index >= state.getNumAgents() - 1:
+            scores = [self.maxValue(depth + 1, state) for state in successors]
+        else:
+            scores = [self.minValue(depth, state, index + 1) for state in successors]
+
+        return min(scores)
 
     # game.py -> Agent -> helper methods for "gameState"
-    def getAction(self,gameState):
+    def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
@@ -244,99 +268,18 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        def maxValue(state, index):
+        # get pacman legal actions
+        actions = gameState.getLegalActions(0)
 
-            # if state is terminal -> return the states utility
-            if self.depth == 0 or state.getLegalActions(index) == "STOP":
-                return self.evaluationFunction(state)
+        # result gamestate for all legal actions
+        successors = [gameState.generateSuccessor(0, action) for action in actions]
 
-            # initialize v to inf
-            v = float('-inf')
-
-            scores = []
-            scores.append((v,""))
-
-             # for each successor of state:
-            for action in state.getLegalActions(index):
-                successor = gameState.generateSuccessor(index, action)
-
-                #print("Pacman Successor: ", successor)
-
-                # v = min(v, value(c))
-                score = self.evaluationFunction(successor)
-                #print("Pacman Successor Score: ", score)
-                if score > v:
-                    scores.append((score, action))
-                else:
-                    scores.append((v, action))
-
-            #maximize pacman score
-            maxPacman = max(scores)
-
-            self.depth -= 1
-
-            return maxPacman[1]
-
-        def minValue(state, index):
-
-            # if state is terminal -> return the states utility
-            if self.depth == 0 or state.getLegalActions(index) == "STOP":
-                return self.evaluationFunction(state)
-
-            # initialize v to inf
-            v = float('inf')
-
-            scores = []
-            scores.append((v,""))
-
-             # for each successor of state:
-            for action in state.getLegalActions(index):
-                successor = gameState.generateSuccessor(index, action)
-                #print("Ghost Successor: ", successor)
-
-                # v = min(v, value(c))
-                score = self.evaluationFunction(successor)
-                #print("Ghost Successor Score: ", score)
-                if score < v:
-                    scores.append((score, action))
-                else:
-                    scores.append((v, action))
-
-            #minimize ghost score
-            minGhost = min(scores)
-
-            self.depth -= 1
-
-            return minGhost[1]
-
-        #['Left', 'Right']
-        # agentIndex=0 means Pacman, ghosts are >= 1
-
-        #---------MAXIMIZE----------
-
-        # Pacman
-        if self.index == 0:
-            return maxValue(gameState, self.index)
-
-        
-        #--------MINIMIZE---------
-
-        # Ghost
-        else:
-            return minValue(gameState, self.index)
-
-
-        # # Returns the total number of agents in the game
-        # print(gameState.getNumAgents())
-
-        # # Returns whether or not the game state is a winning state
-        # print(gameState.isWin())
-
-        # # Returns whether or not the game state is a losing state
-        # print(gameState.isLose())
-
-
-        # util.raiseNotDefined()
+        # get scores from minimizer
+        scores = [self.minValue(0, state, 1) for state in successors]
+        bestScore = max(scores)
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices)
+        return actions[chosenIndex]
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
