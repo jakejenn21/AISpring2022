@@ -182,11 +182,41 @@ class MultiAgentSearchAgent(Agent):
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
 
+# def maxValue(self, sucessors, alpha = None, beta = None):
+#     # initialize v to -inf
+#     v = float('-inf')
+#     # for each successor of state:
+#     for successor in sucessors:
+#          # v = min(v, value(c))
+#         v = max(v, self.evaluationFunction(successor))
+#     #return v
+#     return v
+
+# def minValue(self, sucessors, alpha = None, beta = None):
+#     # initialize v to inf
+#     v = float('inf')
+#     # for each successor of state:
+#     for successor in sucessors:
+#          # v = min(v, value(c))
+#         v = min(v, self.evaluationFunction(successor))
+#     #return v
+#     return v
+
+# def expValue(self, sucessors):
+#     # initialize v to 0
+#     v = 0
+#     # for each successor of state:
+#         # p = probability(successor)
+#         # v += p * value(successor)
+#     #return v
+#     return util.raiseNotDefined()
+
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
     """
+
 
     # game.py -> Agent -> helper methods for "gameState"
     def getAction(self,gameState):
@@ -214,28 +244,26 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        # if state is terminal -> return the states utility
-        if gameState.isWin() or self.depth == 0:
-            return self.evaluationFunction(gameState)
+        def maxValue(state, index):
 
-        # we need to add cost for each depth that scales up the deeper
+            # if state is terminal -> return the states utility
+            if self.depth == 0 or state.getLegalActions(index) == "STOP":
+                return self.evaluationFunction(state)
 
-        #['Left', 'Right']
-        # agentIndex=0 means Pacman, ghosts are >= 1
+            # initialize v to inf
+            v = float('-inf')
 
-        # Pacman
-        if self.index == 0:
-            #---------MAXIMIZE----------
-
-            v = -100000000000
             scores = []
             scores.append((v,""))
 
-            # Pacman actions sucessors
-            for action in gameState.getLegalActions(self.index):
-                #print(gameState.generateSuccessor(self.index, action))
-                pacmanActionSucessor = gameState.generateSuccessor(self.index, action)
-                score = self.evaluationFunction(pacmanActionSucessor)
+             # for each successor of state:
+            for action in state.getLegalActions(index):
+                successor = gameState.generateSuccessor(index, action)
+
+                #print("Pacman Successor: ", successor)
+
+                # v = min(v, value(c))
+                score = self.evaluationFunction(successor)
                 #print("Pacman Successor Score: ", score)
                 if score > v:
                     scores.append((score, action))
@@ -249,51 +277,66 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             return maxPacman[1]
 
-        # Ghost
-        else:
-            #--------MINIMIZE---------
-            ghosts = []
-            # for each ghost
-            for i in range(gameState.getNumAgents()-1):
-                v = 10000000000
-                scores = []
-                scores.append((v,""))
-                #print(gameState.getLegalActions(i))
-                # Ghost actions sucessors
-                for action in gameState.getLegalActions(i):
-                    #print(gameState.generateSuccessor(i, action))
-                    ghostActionSucessor = gameState.generateSuccessor(i, action)
-                    score = self.evaluationFunction(ghostActionSucessor)
-                    #print("Ghost Successor Score: ", score)
-                    if score < v:
-                        scores.append((score, action))
-                    else:
-                        scores.append((v, action))
-                
-                #minimize ghosts score
-                minGhost = min(scores)
-                ghosts.append(minGhost)
-            
+        def minValue(state, index):
+
+            # if state is terminal -> return the states utility
+            if self.depth == 0 or state.getLegalActions(index) == "STOP":
+                return self.evaluationFunction(state)
+
+            # initialize v to inf
+            v = float('inf')
+
+            scores = []
+            scores.append((v,""))
+
+             # for each successor of state:
+            for action in state.getLegalActions(index):
+                successor = gameState.generateSuccessor(index, action)
+                #print("Ghost Successor: ", successor)
+
+                # v = min(v, value(c))
+                score = self.evaluationFunction(successor)
+                #print("Ghost Successor Score: ", score)
+                if score < v:
+                    scores.append((score, action))
+                else:
+                    scores.append((v, action))
+
+            #minimize ghost score
+            minGhost = min(scores)
+
             self.depth -= 1
 
-            minGhosts = min(ghosts)
+            return minGhost[1]
 
-            return minGhosts[1]
+        #['Left', 'Right']
+        # agentIndex=0 means Pacman, ghosts are >= 1
 
-    
+        #---------MAXIMIZE----------
+
+        # Pacman
+        if self.index == 0:
+            return maxValue(gameState, self.index)
+
+        
+        #--------MINIMIZE---------
+
+        # Ghost
+        else:
+            return minValue(gameState, self.index)
 
 
-        # Returns the total number of agents in the game
-        print(gameState.getNumAgents())
+        # # Returns the total number of agents in the game
+        # print(gameState.getNumAgents())
 
-        # Returns whether or not the game state is a winning state
-        print(gameState.isWin())
+        # # Returns whether or not the game state is a winning state
+        # print(gameState.isWin())
 
-        # Returns whether or not the game state is a losing state
-        print(gameState.isLose())
+        # # Returns whether or not the game state is a losing state
+        # print(gameState.isLose())
 
 
-        util.raiseNotDefined()
+        # util.raiseNotDefined()
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
