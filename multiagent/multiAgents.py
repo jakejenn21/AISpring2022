@@ -180,36 +180,6 @@ class MultiAgentSearchAgent(Agent):
         self.depth = int(depth)
 
 
-# def maxValue(self, sucessors, alpha = None, beta = None):
-#     # initialize v to -inf
-#     v = float('-inf')
-#     # for each successor of state:
-#     for successor in sucessors:
-#          # v = min(v, value(c))
-#         v = max(v, self.evaluationFunction(successor))
-#     #return v
-#     return v
-
-# def minValue(self, sucessors, alpha = None, beta = None):
-#     # initialize v to inf
-#     v = float('inf')
-#     # for each successor of state:
-#     for successor in sucessors:
-#          # v = min(v, value(c))
-#         v = min(v, self.evaluationFunction(successor))
-#     #return v
-#     return v
-
-# def expValue(self, sucessors):
-#     # initialize v to 0
-#     v = 0
-#     # for each successor of state:
-#         # p = probability(successor)
-#         # v += p * value(successor)
-#     #return v
-#     return util.raiseNotDefined()
-
-
 class MinimaxAgent(MultiAgentSearchAgent):
     """
     Your minimax agent (question 2)
@@ -217,29 +187,44 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def maxValue(self, depth, state):
 
+        # check if terminal or max depth achieved
         if self.depth == depth or state.isLose() or state.isWin():
             return self.evaluationFunction(state)
 
+        # get actions of pacman
         actions = state.getLegalActions(0)
 
+        # get successors of pacman based on actions
         successors = [state.generateSuccessor(0, action) for action in actions]
+
+        # get scores of ghosts recursively
         scores = [self.minValue(depth, state, 1) for state in successors]
+
+        # maximize pac man score
         return max(scores)
 
     def minValue(self, depth, state, index):
 
+        # check if terminal or max depth achieved
         if self.depth == depth or state.isLose() or state.isWin():
             return self.evaluationFunction(state)
 
+        # get actions of ghosts
         actions = state.getLegalActions(index)
 
+        # get successors of ghost based on actions
         successors = [state.generateSuccessor(index, action) for action in actions]
 
+        # check number of adversaries
+        # print(state.getNumAgents()-1);
         if index >= state.getNumAgents() - 1:
+            # pacman - increase depth by 1 - maximize
             scores = [self.maxValue(depth + 1, state) for state in successors]
         else:
+            # ghost - minimize
             scores = [self.minValue(depth, state, index + 1) for state in successors]
 
+        # minimize ghosts
         return min(scores)
 
     # game.py -> Agent -> helper methods for "gameState"
@@ -268,17 +253,23 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        # get pacman legal actions
+        # get pacman actions
         actions = gameState.getLegalActions(0)
 
-        # result gamestate for all legal actions
+        # get successors of pacman for each action
         successors = [gameState.generateSuccessor(0, action) for action in actions]
 
-        # get scores from minimizer
+        # get scores from minimizer - recursively visits each layer
         scores = [self.minValue(0, state, 1) for state in successors]
+
+        # maximize pac man
         bestScore = max(scores)
+
+        # choose best score for pacman
         bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
         chosenIndex = random.choice(bestIndices)
+
+        # return action
         return actions[chosenIndex]
 
 
