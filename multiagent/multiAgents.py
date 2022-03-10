@@ -82,12 +82,12 @@ class ReflexAgent(Agent):
 
         # (x,y) - position in game
         newPos = successorGameState.getPacmanPosition()
-        #print("Sucessor New Postion: ", newPos)
+        # print("Sucessor New Postion: ", newPos)
 
         # matrix of T/F
         currFood = currentGameState.getFood()
         newFood = successorGameState.getFood()
-        #print("Sucessor New Food: ", newFood)
+        # print("Sucessor New Food: ", newFood)
 
         # [array of ghost states for this sucessor]
         newGhostStates = successorGameState.getGhostStates()
@@ -102,8 +102,7 @@ class ReflexAgent(Agent):
 
         evaluationScore += dist * reward
 
-
-         # pellet distance to player evaluation
+        # pellet distance to player evaluation
         dist = 0
         reward = -0.5
         for pellet in successorGameState.getCapsules():
@@ -114,8 +113,6 @@ class ReflexAgent(Agent):
                 evaluationScore += 800
 
         evaluationScore += dist * reward
-
-
 
         # ghost to player evaluation
         dist = 0
@@ -188,8 +185,50 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
+    def maxValue(self, depth, state):
+
+        # check if terminal or max depth achieved
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        # get actions of pacman
+        actions = state.getLegalActions(0)
+
+        # get successors of pacman based on actions
+        successors = [state.generateSuccessor(0, action) for action in actions]
+
+        # get scores of ghosts recursively
+        scores = [self.minValue(depth, state, 1) for state in successors]
+
+        # maximize pac man score
+        return max(scores)
+
+    def minValue(self, depth, state, index):
+
+        # check if terminal or max depth achieved
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        # get actions of ghosts
+        actions = state.getLegalActions(index)
+
+        # get successors of ghost based on actions
+        successors = [state.generateSuccessor(index, action) for action in actions]
+
+        # check number of adversaries
+        # print(state.getNumAgents()-1);
+        if index >= state.getNumAgents() - 1:
+            # pacman - increase depth by 1 - maximize
+            scores = [self.maxValue(depth + 1, state) for state in successors]
+        else:
+            # ghost - minimize
+            scores = [self.minValue(depth, state, index + 1) for state in successors]
+
+        # minimize ghosts
+        return min(scores)
+
     # game.py -> Agent -> helper methods for "gameState"
-    def getAction(self,gameState):
+    def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
         and self.evaluationFunction.
@@ -214,86 +253,24 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
-        # if state is terminal -> return the states utility
-        if gameState.isWin() or self.depth == 0:
-            return self.evaluationFunction(gameState)
+        # get pacman actions
+        actions = gameState.getLegalActions(0)
 
-        # we need to add cost for each depth that scales up the deeper
+        # get successors of pacman for each action
+        successors = [gameState.generateSuccessor(0, action) for action in actions]
 
-        #['Left', 'Right']
-        # agentIndex=0 means Pacman, ghosts are >= 1
+        # get scores from minimizer - recursively visits each layer
+        scores = [self.minValue(0, state, 1) for state in successors]
 
-        # Pacman
-        if self.index == 0:
-            #---------MAXIMIZE----------
+        # maximize pac man
+        bestScore = max(scores)
 
-            v = -100000000000
-            scores = []
-            scores.append((v,""))
+        # choose best score for pacman
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices)
 
-            # Pacman actions sucessors
-            for action in gameState.getLegalActions(self.index):
-                #print(gameState.generateSuccessor(self.index, action))
-                pacmanActionSucessor = gameState.generateSuccessor(self.index, action)
-                score = self.evaluationFunction(pacmanActionSucessor)
-                #print("Pacman Successor Score: ", score)
-                if score > v:
-                    scores.append((score, action))
-                else:
-                    scores.append((v, action))
-
-            #maximize pacman score
-            maxPacman = max(scores)
-
-            self.depth -= 1
-
-            return maxPacman[1]
-
-        # Ghost
-        else:
-            #--------MINIMIZE---------
-            ghosts = []
-            # for each ghost
-            for i in range(gameState.getNumAgents()-1):
-                v = 10000000000
-                scores = []
-                scores.append((v,""))
-                #print(gameState.getLegalActions(i))
-                # Ghost actions sucessors
-                for action in gameState.getLegalActions(i):
-                    #print(gameState.generateSuccessor(i, action))
-                    ghostActionSucessor = gameState.generateSuccessor(i, action)
-                    score = self.evaluationFunction(ghostActionSucessor)
-                    #print("Ghost Successor Score: ", score)
-                    if score < v:
-                        scores.append((score, action))
-                    else:
-                        scores.append((v, action))
-                
-                #minimize ghosts score
-                minGhost = min(scores)
-                ghosts.append(minGhost)
-            
-            self.depth -= 1
-
-            minGhosts = min(ghosts)
-
-            return minGhosts[1]
-
-    
-
-
-        # Returns the total number of agents in the game
-        print(gameState.getNumAgents())
-
-        # Returns whether or not the game state is a winning state
-        print(gameState.isWin())
-
-        # Returns whether or not the game state is a losing state
-        print(gameState.isLose())
-
-
-        util.raiseNotDefined()
+        # return action
+        return actions[chosenIndex]
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
