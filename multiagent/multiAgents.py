@@ -292,20 +292,15 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # get actions of pacman
         actions = state.getLegalActions(0)
 
-        # get successors of pacman based on actions
-        # successors = [state.generateSuccessor(0, action) for action in actions]
-
-        # get scores of ghosts recursively
-        # scores = [self.minValue(depth, state, 1) for state in successors]
-        #for state in successors:
         for action in actions:
+            # get successor of pacman based on action
             nextState = state.generateSuccessor(0, action)
+            # get scores of ghosts recursively and maximize score
             v = max(v, self.minValue(depth, nextState, 1, alpha, beta))
-            if v >= beta:
+            if v > beta:
                 return v
             alpha = max(alpha, v)
 
-        # maximize pac man score
         return v
 
     def minValue(self, depth, state, index, alpha, beta):
@@ -319,39 +314,22 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # get actions of ghosts
         actions = state.getLegalActions(index)
 
-        # get successors of ghost based on actions
-        # successors = [state.generateSuccessor(index, action) for action in actions]
-
-        # check number of adversaries
-        # print(state.getNumAgents()-1);
-        scores = []
-        if index >= state.getNumAgents() - 1:
-            # pacman - increase depth by 1 - maximize
-            # scores = [self.maxValue(depth + 1, state) for state in successors]
-            #for state in successors:
-            for action in actions:
-                newState = state.generateSuccessor(index, action)
+        for action in actions:
+            # get successor of ghost based on action
+            newState = state.generateSuccessor(index, action)
+            if index >= state.getNumAgents() - 1:
+                # pacman - maximize
                 score = self.maxValue(depth + 1, newState, alpha, beta)
-                v = min(v, score)
-                scores.append(score)
-                if v <= alpha:
-                    return v
-                beta = min(beta, v)
-        else:
-            # ghost - minimize
-            # scores = [self.minValue(depth, state, index + 1) for state in successors]
-            #for state in successors:
-            for action in actions:
-                newState = state.generateSuccessor(index, action)
+            else:
+                # ghost - minimize
                 score = self.minValue(depth, newState, index + 1, alpha, beta)
-                v = max(v, score)
-                scores.append(score)
-                if v >= beta:
-                    return v
-                alpha = max(alpha, v)
+            # minimize return value
+            v = min(v, score)
+            if v < alpha:
+                return v
+            beta = min(beta, v)
 
-        # minimize ghosts
-        return min(scores)
+        return v
 
     def getAction(self, gameState):
         """
@@ -362,22 +340,19 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         # get pacman actions
         actions = gameState.getLegalActions(0)
 
-        # get successors of pacman for each action
-        #successors = [gameState.generateSuccessor(0, action) for action in actions]
-
-        # get scores from minimizer - recursively visits each layer
-        # scores = [self.minValue(0, state, 1, self.NEG_INF, self.INF) for state in successors]
         v = self.NEG_INF
         scores = []
         alpha = self.NEG_INF
         beta = self.INF
 
-        #for state in successors:
         for action in actions:
+            # get successor of pacman for each action
             state = gameState.generateSuccessor(0, action)
+            # get score from recursive minimizer
             score = self.minValue(0, state, 1, alpha, beta)
             v = max(v, score)
             scores.append(score)
+            # no need to prune because beta never changes at root
             alpha = max(alpha, v)
 
         # maximize pac man
