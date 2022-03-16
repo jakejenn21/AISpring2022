@@ -371,6 +371,50 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
+    def maxValue(self, depth, state):
+
+        # check if terminal or max depth achieved
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        # get actions of pacman
+        actions = state.getLegalActions(0)
+
+        # get successors of pacman based on actions
+        successors = [state.generateSuccessor(0, action) for action in actions]
+
+        # get scores of ghosts recursively
+        scores = [self.expValue(depth, state, 1) for state in successors]
+
+        # maximize pac man score
+        return max(scores)
+
+    def expValue(self, depth, state, index):
+        # in minValue, find expected value instead of min
+        # P(successor) = 1 / # of successors
+
+        # check if terminal or max depth achieved
+        if self.depth == depth or state.isLose() or state.isWin():
+            return self.evaluationFunction(state)
+
+        # get actions of ghosts
+        actions = state.getLegalActions(index)
+
+        # get successors of ghost based on actions
+        successors = [state.generateSuccessor(index, action) for action in actions]
+
+        # check number of adversaries
+        # print(state.getNumAgents()-1);
+        if index >= state.getNumAgents() - 1:
+            # pacman - increase depth by 1 - maximize
+            scores = [self.maxValue(depth + 1, state) * (1 / len(successors)) for state in successors]
+        else:
+            # ghost - minimize
+            scores = [self.expValue(depth, state, index + 1) * (1 / len(successors)) for state in successors]
+
+        # minimize ghosts
+        return sum(scores)
+
     def getAction(self, gameState):
         """
         Returns the expectimax action using self.depth and self.evaluationFunction
@@ -379,7 +423,25 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # get pacman actions
+        actions = gameState.getLegalActions(0)
+
+        # get successors of pacman for each action
+        successors = [gameState.generateSuccessor(0, action) for action in actions]
+
+        # get scores from minimizer - recursively visits each layer
+        scores = [self.expValue(0, state, 1) for state in successors]
+
+        # maximize pac man
+        bestScore = max(scores)
+
+        # choose best score for pacman
+        bestIndices = [index for index in range(len(scores)) if scores[index] == bestScore]
+        chosenIndex = random.choice(bestIndices)
+
+        # return action
+        return actions[chosenIndex]
 
 
 def betterEvaluationFunction(currentGameState):
