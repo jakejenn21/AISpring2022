@@ -17,8 +17,11 @@ from util import manhattanDistance
 from game import Directions
 import random
 import util
+import search
+import searchAgents
 
 from game import Agent
+
 
 
 class ReflexAgent(Agent):
@@ -443,6 +446,68 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         # return action
         return actions[chosenIndex]
 
+def depthFirstSearch(currentGameState, depth):
+    """
+    Search the deepest nodes in the search tree first.
+
+    Your search algorithm needs to return a list of actions that reaches the
+    goal. Make sure to implement a graph search algorithm.
+
+    To get started, you might want to try some of these simple commands to
+    understand the search problem that is being passed in:
+    """
+
+    # print("Start:", problem.getStartState())
+    # print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
+    # print("Start's successors:", problem.getSuccessors(problem.getStartState()))
+    "*** YOUR CODE HERE ***"
+
+    # Strategy: expand a deepest node first
+    # Frontier is a stack in util.py
+
+    closed = set()
+    fringe = util.Stack()
+
+    if len(currentGameState.getLegalActions()) == 0:
+        return None
+
+    # add start state with an empty action list
+    fringe.push((currentGameState, []))
+    while True:
+        if fringe.isEmpty():
+            # TODO: use a better error
+            util.raiseNotDefined()
+        node = fringe.pop()
+        currState = node[0]
+        currActions = node[1]
+        if self.currentGameState.isLose() or currentGameState.isWin():
+            return currActions
+        if currState not in closed:
+            closed.add(currState)
+            # for (state, action, cost) in currentGameState.getSuccessors(currState):
+            for action in currentGameState.getLegalActions():
+                successor = currentGameState.generatePacmanSuccessor(action)
+                # keep track of all actions leading to this one
+                newActions = currActions + [action]
+                fringe.push((successor, newActions))
+
+def mazeDistance(point1, point2, gameState):
+    """
+    Returns the maze distance between any two points, using the search functions
+    you have already built. The gameState can be any game state -- Pacman's
+    position in that state is ignored.
+
+    Example usage: mazeDistance( (2,4), (5,6), gameState)
+
+    This might be a useful helper function for your ApproximateSearchAgent.
+    """
+    x1, y1 = point1
+    x2, y2 = point2
+    walls = gameState.getWalls()
+    assert not walls[x1][y1], 'point1 is a wall: ' + str(point1)
+    assert not walls[x2][y2], 'point2 is a wall: ' + str(point2)
+    #prob = searchAgents.PositionSearchProblem(gameState, start=point1, goal=point2, warn=False, visualize=False)
+    return len(depthFirstSearch(gameState, gameState.depth))
 
 def betterEvaluationFunction(currentGameState):
     """
@@ -452,8 +517,30 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    # Here are some useful elements of the startState
+    walls = currentGameState.getWalls()
+    foods = currentGameState.getFood().asList()
+    sum = 0
+    currentPacmanPosition = currentGameState.getPacmanPosition()
+    for food in foods:
+        sum += mazeDistance(currentPacmanPosition, food, currentGameState)
 
+    sum = sum/len(foods)
+
+    #get adversaries
+    ghosts = currentGameState.getGhostStates()
+
+    for ghost in ghosts:
+        if ghost.scaredTimer > 0:
+            # if scared give positive cost the closer they are
+            sum += mazeDistance(currentPacmanPosition, ghost.getPosition(), currentGameState)
+        else:
+            # else give negative cost the closer they are
+            sum -= mazeDistance(currentPacmanPosition, ghost.getPosition(), currentGameState)
+
+    sum = sum / len(ghosts)
+
+    return sum
 
 # Abbreviation
 better = betterEvaluationFunction
