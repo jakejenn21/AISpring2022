@@ -43,6 +43,7 @@ class QLearningAgent(ReinforcementAgent):
         ReinforcementAgent.__init__(self, **args)
 
         "*** YOUR CODE HERE ***"
+        self.qValues = util.Counter()
 
     def getQValue(self, state, action):
         """
@@ -51,8 +52,7 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
-
+        return self.qValues[(state, action)]
 
     def computeValueFromQValues(self, state):
         """
@@ -62,7 +62,15 @@ class QLearningAgent(ReinforcementAgent):
           terminal state, you should return a value of 0.0.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if len(self.getLegalActions(state)) == 0:
+            return 0.0
+
+        maxQVal = float('-inf')
+        for action in self.getLegalActions(state):
+            currVal = self.getQValue(state, action)
+            if currVal > maxQVal:
+                maxQVal = currVal
+        return maxQVal
 
     def computeActionFromQValues(self, state):
         """
@@ -71,7 +79,30 @@ class QLearningAgent(ReinforcementAgent):
           you should return None.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if len(self.getLegalActions(state)) == 0:
+            return None
+
+        # maxQVal = (None, float('-inf'))
+        # for action in self.getLegalActions(state):
+        #     currVal = self.getQValue(state, action)
+        #     if currVal > maxQVal[1]:
+        #         maxQVal = action, currVal
+        #     # break ties
+        #     elif currVal == maxQVal[1]:
+        #         currAction = random.choice(maxQVal[0], action)
+        #         maxQVal = currAction, currVal
+        # return maxQVal
+
+        maxQVal = [(None, -2147483648)]
+        for action in self.getLegalActions(state):
+            currVal = self.getQValue(state, action)
+            if currVal > maxQVal[0][1]:
+                maxQVal = [(action, currVal)]
+            # break ties
+            elif currVal == maxQVal[0][1]:
+                maxQVal.append((action, currVal))
+
+        return random.choice(maxQVal)[0]
 
     def getAction(self, state):
         """
@@ -88,7 +119,14 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        if len(legalActions) == 0:
+            return action
+
+        choice = util.flipCoin(self.epsilon)
+        if choice:
+            action = random.choice(legalActions)
+        else:
+            action = self.computeActionFromQValues(state)
 
         return action
 
@@ -102,7 +140,18 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        maxQVal = float("-inf")
+        if len(self.getLegalActions(nextState)) == 0:
+            self.qValues[(state, action)] = ((1 - self.alpha) * self.getQValue(state, action)) + (self.alpha * reward)
+            return
+
+        for nextAction in self.getLegalActions(nextState):
+            newVal = self.getQValue(nextState, nextAction)
+            if newVal > maxQVal:
+                maxQVal = newVal
+
+        currSample = reward + self.discount * maxQVal
+        self.qValues[(state, action)] = ((1 - self.alpha) * self.getQValue(state, action)) + (self.alpha * currSample)
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
